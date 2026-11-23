@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quality Control Certificate (QC - CA-102)</title>
+<style>
+  :root {
+    --primary: #1a365d;
+    --border: #2d3748;
+    --bg-gray: #f7fafc;
+    --ng-bg: #fed7d7;
+    --ng-text: #9b2c2c;
+    --ok-bg: #c6f6d5;
+    --ok-text: #22543d;
+  }
+  * { box-sizing: border-box; font-family: "Times New Roman", "Microsoft YaHei", "PingFang SC", serif; }
+  body { margin: 0; padding: 20px; background: #edf2f7; color: #1a202c; }
+  
+  /* Toolbar (Hidden on Print) */
+  .toolbar {
+    max-width: 1100px; margin: 0 auto 20px auto; padding: 14px 20px;
+    background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .toolbar-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .btn {
+    padding: 7px 14px; border: 1px solid #cbd5e0; border-radius: 5px; background: #fff;
+    cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .btn:hover { background: #edf2f7; }
+  .btn-primary { background: #2b6cb0; color: #fff; border-color: #2b6cb0; }
+  .btn-primary:hover { background: #2c5282; }
+  .btn-success { background: #2f855a; color: #fff; border-color: #2f855a; }
+  .btn-success:hover { background: #276749; }
+  .btn-warning { background: #d69e2e; color: #fff; border-color: #d69e2e; }
+  .btn-warning:hover { background: #b7791f; }
+  .lang-switch { display: inline-flex; border: 1px solid #2b6cb0; border-radius: 5px; overflow: hidden; }
+  .lang-switch button { border: none; padding: 7px 14px; cursor: pointer; font-weight: 600; font-size: 13px; background: #fff; color: #2b6cb0; }
+  .lang-switch button.active { background: #2b6cb0; color: #fff; }
+  .status-badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+  .status-ok { background: var(--ok-bg); color: var(--ok-text); }
+  .status-ng { background: var(--ng-bg); color: var(--ng-text); }
+
+  /* Certificate Sheet */
+  .sheet {
+    max-width: 1100px; margin: 0 auto; background: #fff; padding: 30px 36px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  h1.doc-title {
+    text-align: center; font-size: 22px; letter-spacing: 1px; margin: 0 0 18px 0;
+    text-transform: uppercase; font-weight: bold;
+  }
+  table { width: 100%; border-collapse: collapse; margin-bottom: -1px; font-size: 13px; }
+  th, td { border: 1px solid #000; padding: 5px 6px; vertical-align: middle; }
+  th { background: #f8f9fa; font-weight: bold; text-align: center; }
+  .text-left { text-align: left; }
+  .text-center { text-align: center; }
+  .bold { font-weight: bold; }
+
+  /* Editable inputs inside table */
+  input[type="text"], input[type="number"], textarea {
+    width: 100%; border: 1px dashed #cbd5e0; background: #fffff0;
+    padding: 2px 4px; font-size: 13px; font-family: inherit; color: #000;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+    outline: none; border: 1px solid #3182ce; background: #ebf8ff;
+  }
+  .sample-input {
+    width: 100%; text-align: center; border: none !important; background: transparent !important;
+    padding: 2px 0; font-size: 12.5px;
+  }
+  .sample-input:focus { background: #ebf8ff !important; outline: 1px solid #3182ce; }
+  td.cell-ng { background-color: var(--ng-bg) !important; }
+  td.cell-ng input { color: var(--ng-text); font-weight: bold; }
+
+  .spec-input { width: 52px !important; text-align: center; font-size: 12px !important; }
+  .inline-input { width: 140px !important; display: inline-block; }
+  .inline-num { width: 75px !important; display: inline-block; text-align: center; }
+
+  .check-group { display: flex; flex-direction: column; gap: 4px; }
+  .check-item { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .check-item input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; }
+
+  /* Edit mode highlight for bilingual labels */
+  body.edit-i18n-mode [data-i18n] {
+    outline: 1px dashed #d69e2e;
+    background-color: #fefcbf;
+    cursor: pointer;
+    padding: 1px 3px;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 1000; align-items: center; justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff; width: 90%; max-width: 720px; max-height: 85vh; border-radius: 8px;
+    display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+  .modal-header { padding: 14px 20px; background: #1a365d; color: #fff; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 12px 20px; background: #f7fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; }
+  .dict-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 6px; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar, .no-print { display: none !important; }
+    .sheet { box-shadow: none; padding: 10px; max-width: 100%; }
+    input[type="text"], input[type="number"], textarea {
+      border: none !important; background: transparent !important; padding: 0;
+    }
+    td.cell-ng { background-color: #ffe5e5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page-break { page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <div class="toolbar-group">
+    <div class="lang-switch">
+      <button id="btn-en" class="active" onclick="setLang('en')">English</button>
+      <button id="btn-zh" onclick="setLang('zh')">简体中文</button>
+    </div>
+    <button class="btn btn-warning" onclick="openDictModal()">✏️ 編輯简体中文翻譯</button>
+    <label style="font-size:13px; font-weight:600; display:flex; align-items:center; gap:5px; margin-left:6px;">
+      抽樣數量 (Samples):
+      <input type="number" id="sample-count-input" value="100" min="1" max="500" style="width:68px; text-align:center;" onchange="updateSampleCount(this.value)">
+    </label>
+  </div>
+  <div class="toolbar-group">
+    <span id="qc-summary" class="status-badge status-ok">OK: 310 / 310</span>
+    <button class="btn" onclick="openDataModal()">💾 匯出 / 匯入資料檔 (.json)</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ 列印 / 存成 PDF</button>
+  </div>
+</div>
+
+<div class="sheet" id="certificate-sheet">
+  <h1 class="doc-title" data-i18n="docTitle">QUALITY CONTROL CERTIFICATE</h1>
+
+  <!-- Header Table -->
+  <table>
+    <tr>
+      <td style="width: 24%;"></td>
+      <td style="width: 34%;" class="text-center bold" style="font-size:15px;" data-i18n="inspectionSheet">Inspection Sheet</td>
+      <td style="width: 28%;" class="text-center bold"><span data-i18n="partNoLabel">Part No.</span> <input type="text" id="field-partNo" value="15 F 2128 0720" class="inline-input bold"></td>
+      <td style="width: 14%;" class="text-center bold"><span data-i18n="pageLabel">Page</span><br><span id="page-indicator">1 of 2</span></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="text-left">
+        <div style="margin-bottom:4px;"><span class="bold" data-i18n="orderNo">Order No.:</span> <input type="text" id="field-orderNo" value="BE263485" class="inline-input"></div>
+        <div style="margin-bottom:4px;"><span class="bold" data-i18n="project">Project :</span> <input type="text" id="field-project" value="" class="inline-input"></div>
+        <div><span class="bold" data-i18n="orderQty">Order quantity :</span> <input type="text" id="field-orderQty" value="21,000" class="inline-num"> <span data-i18n="pcs">Pcs.</span></div>
+      </td>
+      <td colspan="2" class="text-left">
+        <div class="bold" style="margin-bottom:4px;" data-i18n="inspectedQty">Inspected Quantity :</div>
+        <div style="margin-bottom:4px;"><span class="bold" data-i18n="visual100">Visual (100%)</span> <input type="text" id="field-visualQty" value="21,000" class="inline-num"> <span data-i18n="pcs">Pcs.</span></div>
+        <div><span class="bold" data-i18n="withTool">With measurement tool : Min.</span> <input type="text" id="field-toolQty" value="100" class="inline-num"> <span data-i18n="pcs">Pcs.</span></div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" class="bold" data-i18n="generalReq">General Requirements :</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold" data-i18n="cert31b">Inspection Certificate of Material 3.1.B</td>
+      <td colspan="2">
+        <div class="check-group">
+          <label class="check-item"><input type="checkbox" id="chk-31b-avail" checked> <span data-i18n="available">Available</span></label>
+          <label class="check-item"><input type="checkbox" id="chk-31b-not"> <span data-i18n="notAvailable">Not available</span></label>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold" data-i18n="cert21">Certificate of Compliance with the order 2.1</td>
+      <td colspan="2">
+        <div class="check-group">
+          <label class="check-item"><input type="checkbox" id="chk-21-avail" checked> <span data-i18n="available">Available</span></label>
+          <label class="check-item"><input type="checkbox" id="chk-21-not"> <span data-i18n="notAvailable">Not available</span></label>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold" data-i18n="corrosion">Corrosion Protection:</td>
+      <td colspan="2">
+        <div class="check-group">
+          <label class="check-item"><input type="checkbox" id="chk-galv" checked> <span data-i18n="galvanized">Galvanized</span></label>
+          <label class="check-item"><input type="checkbox" id="chk-corr-other"> <input type="text" id="field-corrOther" placeholder="..." style="width:180px;"></label>
+          <label class="check-item"><input type="checkbox" id="chk-corr-none"> <span data-i18n="none">None</span></label>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Dynamic Measurement Blocks Container -->
+  <div id="measurement-container"></div>
+
+  <!-- Footer / Approval Table -->
+  <table>
+    <tr>
+      <td colspan="4" class="text-center bold">
+        <span data-i18n="heatNumber">Heat Number</span> <input type="text" id="field-heatNo" value="“2610”– OK" style="width:180px; text-align:center; font-weight:bold;">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" style="padding: 10px 12px;">
+        <div style="font-size:17px; font-weight:bold; margin-bottom:10px;">
+          <span style="margin-right:24px;">DSI</span>
+          <span style="text-decoration:underline;" data-i18n="approvalTitle">Approval for application</span>
+        </div>
+        <div style="display:flex; gap:40px; margin-bottom:8px;">
+          <label class="check-item"><input type="checkbox" id="chk-app-yes"> <span data-i18n="yes">Yes</span></label>
+          <label class="check-item"><input type="checkbox" id="chk-app-rest"> <span data-i18n="approvalRest">Approval under restriction (see Notes)</span></label>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label class="check-item"><input type="checkbox" id="chk-app-no"> <span data-i18n="no">No</span></label>
+        </div>
+        <div style="margin-bottom:8px;">
+          <div class="bold" data-i18n="notes">Notes :</div>
+          <textarea id="field-notes" rows="2"></textarea>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div class="bold" data-i18n="copyTo">Copy to:</div>
+          <textarea id="field-copyTo" rows="2"></textarea>
+        </div>
+        <div class="text-center" style="margin-top:20px;">
+          <span data-i18n="dateSig">Date; Signature</span>: <input type="text" id="field-signature" style="width:260px;">
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- Dictionary Edit Modal -->
+<div class="modal-backdrop" id="dict-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span>自訂简体中文翻譯對照表 (修改後即時生效)</span>
+      <button class="btn" onclick="closeDictModal()">✕</button>
+    </div>
+    <div class="modal-body" id="dict-list"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="resetDict()">恢復預設翻譯</button>
+      <button class="btn btn-primary" onclick="saveDictFromModal()">儲存並套用</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export / Import Modal -->
+<div class="modal-backdrop" id="data-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span>跨國交接：匯出 / 匯入完整報告與翻譯檔 (.json)</span>
+      <button class="btn" onclick="closeDataModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:#4a5568; margin-top:0;">
+        由於您與大陸同事、德國客戶在不同時段編輯，建議每次填寫完畢後點擊「下載最新資料檔 (.json)」，連同此 HTML 網頁一起放在雲端硬碟或傳給下一位接手人員載入即可。
+      </p>
+      <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <button class="btn btn-success" onclick="downloadJson()">⬇️ 下載完整資料檔 (.json)</button>
+        <label class="btn btn-primary" style="cursor:pointer;">
+          ⬆️ 載入資料檔 (.json)
+          <input type="file" accept=".json" style="display:none;" onchange="uploadJson(event)">
+        </label>
+      </div>
+      <div style="font-size:12px; font-weight:bold; margin-bottom:4px;">目前資料預覽 (JSON)：</div>
+      <textarea id="json-preview" rows="10" readonly style="font-family:monospace; font-size:11px; background:#f7fafc;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeDataModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 1. Bilingual Dictionary (EN + Editable Simplified Chinese)
+const defaultDict = {
+  docTitle: { en: "QUALITY CONTROL CERTIFICATE", zh: "质量控制证书" },
+  inspectionSheet: { en: "Inspection Sheet", zh: "检验记录表" },
+  partNoLabel: { en: "Part No.", zh: "零件编号" },
+  pageLabel: { en: "Page", zh: "页码" },
+  orderNo: { en: "Order No.:", zh: "订单编号：" },
+  project: { en: "Project :", zh: "项目名称：" },
+  orderQty: { en: "Order quantity :", zh: "订单数量：" },
+  pcs: { en: "Pcs.", zh: "件" },
+  inspectedQty: { en: "Inspected Quantity :", zh: "检验数量：" },
+  visual100: { en: "Visual (100%)", zh: "外观目检 (100%)" },
+  withTool: { en: "With measurement tool : Min.", zh: "量具抽检：最少" },
+  generalReq: { en: "General Requirements :", zh: "通用要求：" },
+  cert31b: { en: "Inspection Certificate of Material 3.1.B", zh: "材质检验证书 3.1.B" },
+  cert21: { en: "Certificate of Compliance with the order 2.1", zh: "订单符合性证书 2.1" },
+  corrosion: { en: "Corrosion Protection:", zh: "表面防腐处理：" },
+  available: { en: "Available", zh: "有 / 提供" },
+  notAvailable: { en: "Not available", zh: "无 / 未提供" },
+  galvanized: { en: "Galvanized", zh: "镀锌" },
+  none: { en: "None", zh: "无" },
+  reqHeader: { en: "Requirement (see drawing)", zh: "技术要求（见图纸）" },
+  nomVal: { en: "Nom. Value", zh: "公称值" },
+  minVal: { en: "Min. Value", zh: "最小值" },
+  maxVal: { en: "Max. Value", zh: "最大值" },
+  sampleHeader: { en: "Sample", zh: "样本编号" },
+  threadDia: { en: "Thread Diameter", zh: "螺纹直径" },
+  length: { en: "Length", zh: "长度" },
+  widthAssembly: { en: "Width after assembly", zh: "装配后宽度" },
+  brinell: { en: "Brinell Hardness", zh: "布氏硬度" },
+  pullOut: { en: "Pull out test (cone)", zh: "拉拔测试（锥体）" },
+  heatNumber: { en: "Heat Number", zh: "炉批号" },
+  approvalTitle: { en: "Approval for application", zh: "应用批准" },
+  yes: { en: "Yes", zh: "同意" },
+  approvalRest: { en: "Approval under restriction (see Notes)", zh: "有条件同意（见备注）" },
+  no: { en: "No", zh: "不同意" },
+  notes: { en: "Notes :", zh: "备注：" },
+  copyTo: { en: "Copy to:", zh: "抄送：" },
+  dateSig: { en: "Date; Signature", zh: "日期；签名" }
+};
+
+let dict = JSON.parse(localStorage.getItem('qc_ca102_dict')) || JSON.parse(JSON.stringify(defaultDict));
+let currentLang = 'en';
+
+// 2. Specifications & Initial 100-Sample Dataset from Original PDF
+let specs = {
+  thread: { nom: "15.4", min: 15.2, max: 15.6, first20Only: false },
+  length: { nom: "105", min: 104.8, max: 105.8, first20Only: false },
+  width:  { nom: "32", min: 31.7, max: 32.1, first20Only: false },
+  brinell:{ nom: "", min: 180, max: 210, first20Only: true },
+  pullout:{ nom: "190KN", min: 190, max: 9999, first10Only: true }
+};
+
+const initialThread = [
+  15.3,15.5,15.3,15.4,15.3,15.5,15.5,15.4,15.3,15.3,
+  15.3,15.3,15.3,15.4,15.3,15.5,15.4,15.3,15.5,15.4,
+  15.3,15.3,15.2,15.3,15.5,15.4,15.3,15.2,15.5,15.5,
+  15.3,15.5,15.4,15.5,15.5,15.3,15.4,15.4,15.3,15.3,
+  15.3,15.4,15.5,15.5,15.3,15.4,15.4,15.4,15.3,15.3,
+  15.3,15.5,15.4,15.4,15.3,15.5,15.2,15.3,15.2,15.2,
+  15.3,15.3,15.2,15.4,15.5,15.3,15.4,15.4,15.3,15.3,
+  15.3,15.3,15.4,15.3,15.2,15.2,15.3,15.4,15.3,15.3,
+  15.3,15.2,15.3,15.4,15.3,15.3,15.2,15.3,15.2,15.2,
+  15.3,15.4,15.3,15.2,15.5,15.5,15.3,15.6,15.3,15.3
+];
+
+const initialLength = [
+  105.2,105.0,105.3,105.0,105.1,105.2,105.0,105.4,105.2,105.3,
+  105.2,105.0,105.3,105.2,105.1,105.0,105.3,105.2,105.1,105.2,
+  105.2,105.0,105.3,105.2,105.1,105.0,105.3,105.2,105.3,105.2,
+  105.2,105.1,105.0,105.3,105.2,105.0,105.3,105.2,105.0,105.1,
+  105.3,105.2,105.0,105.2,105.0,105.1,105.2,105.1,105.3,105.0,
+  105.2,105.0,105.3,105.1,105.0,105.3,105.0,105.2,105.3,105.1,
+  105.2,105.0,105.1,105.3,105.0,105.2,105.1,105.0,105.3,105.2,
+  105.2,105.3,105.1,105.2,105.0,105.4,105.3,105.0,105.0,105.2,
+  105.3,105.2,105.1,105.3,105.2,105.0,105.1,105.3,105.3,105.0,
+  105.3,105.2,105.1,105.0,105.3,105.2,105.0,105.3,105.0,105.2
+];
+
+const initialWidth = [
+  32.0,32.0,32.1,31.9,32.0,32.0,32.1,31.9,31.9,32.0,
+  32.1,32.1,31.9,31.8,31.9,32.0,32.1,31.9,32.0,32.1,
+  32.1,32.0,32.1,32.0,32.0,32.0,32.1,31.9,31.9,32.0,
+  32.0,32.1,31.9,32.0,32.1,32.1,32.0,32.1,31.9,32.0,
+  32.1,31.9,32.0,31.8,31.9,32.0,32.0,32.1,31.9,31.9,
+  32.1,31.9,32.0,31.9,32.0,32.1,31.8,31.9,32.0,32.1,
+  32.1,32.0,32.1,31.9,32.0,32.0,32.1,31.9,32.0,32.1,
+  32.1,32.0,32.0,32.1,31.8,32.0,32.1,32.1,32.1,32.0,
+  31.9,32.0,32.1,32.0,32.1,32.1,31.9,32.1,32.0,32.0,
+  32.0,32.1,32.0,31.9,31.9,31.8,32.0,31.9,32.0,32.1
+];
+
+const initialBrinell = [190,189,191,188,190,189,189,191,192,192, 190,192,191,192,190,190,191,189,191,188];
+const initialPullout = [199,202,202,203,199,202,201,200,204,200];
+
+let sampleCount = 100;
+let samplesData = {
+  thread: [...initialThread],
+  length: [...initialLength],
+  width: [...initialWidth],
+  brinell: [...initialBrinell],
+  pullout: [...initialPullout]
+};
+
+function renderMeasurements() {
+  const container = document.getElementById('measurement-container');
+  container.innerHTML = '';
+  const blocks = Math.ceil(sampleCount / 10);
+  document.getElementById('page-indicator').innerText = `1 of ${Math.max(1, Math.ceil(blocks / 5))}`;
+
+  for (let b = 0; b < blocks; b++) {
+    const startIdx = b * 10;
+    const tbl = document.createElement('table');
+    if (b > 0 && b % 5 === 0) tbl.classList.add('page-break');
+
+    // Header Row (only full header on first block, sample numbers on subsequent blocks)
+    let thead = '<tr>';
+    if (b === 0) {
+      thead += `<th rowspan="2" style="width:18%;" data-i18n="reqHeader">${dict.reqHeader[currentLang]}</th>
+                <th rowspan="2" style="width:6%;" data-i18n="nomVal">${dict.nomVal[currentLang]}</th>
+                <th rowspan="2" style="width:6%;" data-i18n="minVal">${dict.minVal[currentLang]}</th>
+                <th rowspan="2" style="width:6%;" data-i18n="maxVal">${dict.maxVal[currentLang]}</th>
+                <th colspan="10" data-i18n="sampleHeader">${dict.sampleHeader[currentLang]}</th></tr><tr>`;
+    } else {
+      thead += `<th style="width:18%;"></th><th style="width:6%;"></th><th style="width:6%;"></th><th style="width:6%;"></th>`;
+    }
+    for (let c = 0; c < 10; c++) {
+      const sNum = startIdx + c + 1;
+      thead += `<th style="width:6.4%;">${sNum <= sampleCount ? sNum : ''}</th>`;
+    }
+    thead += '</tr>';
+
+    // Helper to build a measurement row
+    const buildRow = (key, labelKey, hasMax = true) => {
+      let tr = `<tr><td class="text-left" data-i18n="${labelKey}">${dict[labelKey][currentLang]}</td>`;
+      if (b === 0) {
+        tr += `<td class="text-center"><input type="text" class="spec-input" value="${specs[key].nom}" onchange="updateSpec('${key}','nom',this.value)"></td>`;
+        if (hasMax) {
+          tr += `<td class="text-center"><input type="number" step="any" class="spec-input" value="${specs[key].min}" onchange="updateSpec('${key}','min',this.value)"></td>
+                 <td class="text-center"><input type="number" step="any" class="spec-input" value="${specs[key].max}" onchange="updateSpec('${key}','max',this.value)"></td>`;
+        } else {
+          tr += `<td colspan="2" class="text-center"><input type="number" step="any" class="spec-input" style="width:80px!important;" value="${specs[key].min}" onchange="updateSpec('${key}','min',this.value)"> KN</td>`;
+        }
+      } else {
+        tr += `<td class="text-center">${specs[key].nom}</td>`;
+        if (hasMax) {
+          tr += `<td class="text-center">${specs[key].min}</td><td class="text-center">${specs[key].max}</td>`;
+        } else {
+          tr += `<td colspan="2" class="text-center">${specs[key].min}KN</td>`;
+        }
+      }
+
+      for (let c = 0; c < 10; c++) {
+        const idx = startIdx + c;
+        if (idx < sampleCount) {
+          const val = samplesData[key][idx] !== undefined ? samplesData[key][idx] : '';
+          const isNg = checkNg(key, val);
+          tr += `<td class="${isNg ? 'cell-ng' : ''}"><input type="text" class="sample-input" value="${val}" onchange="updateSample('${key}',${idx},this)"></td>`;
+        } else {
+          tr += `<td style="background:#f7fafc;"></td>`;
+        }
+      }
+      tr += '</tr>';
+      return tr;
+    };
+
+    let tbody = buildRow('thread', 'threadDia', true);
+    tbody += buildRow('length', 'length', true);
+    tbody += buildRow('width', 'widthAssembly', true);
+    if (b === 0 || b === 1) tbody += buildRow('brinell', 'brinell', true);
+    if (b === 0) tbody += buildRow('pullout', 'pullOut', false);
+
+    tbl.innerHTML = thead + tbody;
+    container.appendChild(tbl);
+  }
+  updateSummary();
+}
+
+function checkNg(key, val) {
+  if (val === '' || val === null || val === undefined || isNaN(parseFloat(val))) return false;
+  const num = parseFloat(val);
+  const s = specs[key];
+  if (key === 'pullout') return num < parseFloat(s.min);
+  return num < parseFloat(s.min) || num > parseFloat(s.max);
+}
+
+function updateSample(key, idx, inputEl) {
+  const val = inputEl.value.trim();
+  samplesData[key][idx] = val === '' ? '' : (isNaN(Number(val)) ? val : Number(val));
+  const td = inputEl.parentElement;
+  if (checkNg(key, val)) td.classList.add('cell-ng');
+  else td.classList.remove('cell-ng');
+  updateSummary();
+}
+
+function updateSpec(key, prop, val) {
+  specs[key][prop] = prop === 'nom' ? val : parseFloat(val);
+  renderMeasurements();
+}
+
+function updateSampleCount(val) {
+  const n = Math.max(1, Math.min(500, parseInt(val) || 100));
+  sampleCount = n;
+  document.getElementById('field-toolQty').value = n;
+  renderMeasurements();
+}
+
+function updateSummary() {
+  let total = 0, ng = 0;
+  ['thread', 'length', 'width', 'brinell', 'pullout'].forEach(key => {
+    const limit = key === 'pullout' ? Math.min(10, sampleCount) : (key === 'brinell' ? Math.min(20, sampleCount) : sampleCount);
+    for (let i = 0; i < limit; i++) {
+      const v = samplesData[key][i];
+      if (v !== '' && v !== undefined && v !== null) {
+        total++;
+        if (checkNg(key, v)) ng++;
+      }
+    }
+  });
+  const badge = document.getElementById('qc-summary');
+  if (ng === 0) {
+    badge.className = 'status-badge status-ok';
+    badge.innerText = `ALL PASS (${total}/${total} OK)`;
+  } else {
+    badge.className = 'status-badge status-ng';
+    badge.innerText = `NG FOUND: ${ng} / ${total}`;
+  }
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) el.innerText = dict[key][lang];
+  });
+}
+
+// Dictionary Editor Modal
+function openDictModal() {
+  const list = document.getElementById('dict-list');
+  list.innerHTML = '';
+  Object.keys(dict).forEach(key => {
+    const row = document.createElement('div');
+    row.className = 'dict-row';
+    row.innerHTML = `
+      <div style="font-size:13px; color:#2d3748;"><strong>EN:</strong> ${dict[key].en}</div>
+      <div><input type="text" data-dict-key="${key}" value="${dict[key].zh}"></div>
+    `;
+    list.appendChild(row);
+  });
+  document.getElementById('dict-modal').classList.add('open');
+}
+function closeDictModal() { document.getElementById('dict-modal').classList.remove('open'); }
+function saveDictFromModal() {
+  document.querySelectorAll('[data-dict-key]').forEach(inp => {
+    const k = inp.getAttribute('data-dict-key');
+    dict[k].zh = inp.value;
+  });
+  localStorage.setItem('qc_ca102_dict', JSON.stringify(dict));
+  setLang(currentLang);
+  closeDictModal();
+}
+function resetDict() {
+  dict = JSON.parse(JSON.stringify(defaultDict));
+  localStorage.removeItem('qc_ca102_dict');
+  openDictModal();
+  setLang(currentLang);
+}
+
+// Export / Import JSON
+function collectState() {
+  return {
+    meta: {
+      partNo: document.getElementById('field-partNo').value,
+      orderNo: document.getElementById('field-orderNo').value,
+      project: document.getElementById('field-project').value,
+      orderQty: document.getElementById('field-orderQty').value,
+      visualQty: document.getElementById('field-visualQty').value,
+      toolQty: document.getElementById('field-toolQty').value,
+      heatNo: document.getElementById('field-heatNo').value,
+      notes: document.getElementById('field-notes').value,
+      copyTo: document.getElementById('field-copyTo').value,
+      signature: document.getElementById('field-signature').value,
+      corrOther: document.getElementById('field-corrOther').value,
+      checks: {
+        c31b_avail: document.getElementById('chk-31b-avail').checked,
+        c31b_not: document.getElementById('chk-31b-not').checked,
+        c21_avail: document.getElementById('chk-21-avail').checked,
+        c21_not: document.getElementById('chk-21-not').checked,
+        galv: document.getElementById('chk-galv').checked,
+        corr_other: document.getElementById('chk-corr-other').checked,
+        corr_none: document.getElementById('chk-corr-none').checked,
+        app_yes: document.getElementById('chk-app-yes').checked,
+        app_rest: document.getElementById('chk-app-rest').checked,
+        app_no: document.getElementById('chk-app-no').checked
+      }
+    },
+    sampleCount,
+    specs,
+    samplesData,
+    dict
+  };
+}
+
+function applyState(state) {
+  if (!state) return;
+  if (state.meta) {
+    const m = state.meta;
+    document.getElementById('field-partNo').value = m.partNo || '';
+    document.getElementById('field-orderNo').value = m.orderNo || '';
+    document.getElementById('field-project').value = m.project || '';
+    document.getElementById('field-orderQty').value = m.orderQty || '';
+    document.getElementById('field-visualQty').value = m.visualQty || '';
+    document.getElementById('field-toolQty').value = m.toolQty || '';
+    document.getElementById('field-heatNo').value = m.heatNo || '';
+    document.getElementById('field-notes').value = m.notes || '';
+    document.getElementById('field-copyTo').value = m.copyTo || '';
+    document.getElementById('field-signature').value = m.signature || '';
+    document.getElementById('field-corrOther').value = m.corrOther || '';
+    if (m.checks) {
+      document.getElementById('chk-31b-avail').checked = !!m.checks.c31b_avail;
+      document.getElementById('chk-31b-not').checked = !!m.checks.c31b_not;
+      document.getElementById('chk-21-avail').checked = !!m.checks.c21_avail;
+      document.getElementById('chk-21-not').checked = !!m.checks.c21_not;
+      document.getElementById('chk-galv').checked = !!m.checks.galv;
+      document.getElementById('chk-corr-other').checked = !!m.checks.corr_other;
+      document.getElementById('chk-corr-none').checked = !!m.checks.corr_none;
+      document.getElementById('chk-app-yes').checked = !!m.checks.app_yes;
+      document.getElementById('chk-app-rest').checked = !!m.checks.app_rest;
+      document.getElementById('chk-app-no').checked = !!m.checks.app_no;
+    }
+  }
+  if (state.sampleCount) {
+    sampleCount = state.sampleCount;
+    document.getElementById('sample-count-input').value = sampleCount;
+  }
+  if (state.specs) specs = state.specs;
+  if (state.samplesData) samplesData = state.samplesData;
+  if (state.dict) {
+    dict = state.dict;
+    localStorage.setItem('qc_ca102_dict', JSON.stringify(dict));
+  }
+  renderMeasurements();
+  setLang(currentLang);
+}
+
+function openDataModal() {
+  document.getElementById('json-preview').value = JSON.stringify(collectState(), null, 2);
+  document.getElementById('data-modal').classList.add('open');
+}
+function closeDataModal() { document.getElementById('data-modal').classList.remove('open'); }
+function downloadJson() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(collectState(), null, 2));
+  const dlAnchor = document.createElement('a');
+  const orderNo = document.getElementById('field-orderNo').value || 'Report';
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `QC-CA-102_${orderNo}.json`);
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+}
+function uploadJson(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      applyState(parsed);
+      closeDataModal();
+      alert('資料載入成功！');
+    } catch (err) {
+      alert('檔案格式錯誤，請確認是否為正確的 .json 資料檔。');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Init
+renderMeasurements();
+</script>
+</body>
+</html>
